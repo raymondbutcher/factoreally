@@ -1,0 +1,83 @@
+[project]
+name = "factoreally"
+version = "0.3.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [{ name = "Raymond Butcher", email = "randomy@gmail.com" }]
+requires-python = ">=3.12"
+dependencies = [
+    "click>=8.3.0",
+    "numpy>=2.3.3",
+    "pydantic>=2.11.9",
+    "scipy>=1.16.2",
+]
+
+[project.scripts]
+factoreally = "factoreally.cli:cli"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "coverage>=7.10.7",
+    "mypy>=1.18.2",
+    "pytest>=8.4.2",
+    "ruff>=0.13.2",
+    "scipy-stubs>=1.16.2.0",
+]
+
+[tool.basedpyright]
+reportAny = false
+reportExplicitAny = false
+reportImplicitOverride = false
+reportUnannotatedClassAttribute = false
+reportUnusedCallResult = false
+
+[tool.coverage.report]
+exclude_also = ["if TYPE_CHECKING:"]
+
+[tool.coverage.run]
+branch = true
+relative_files = true
+source = ["factoreally/"]
+
+[tool.mypy]
+strict = true
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "ANN401",  # wants to avoid using typing.Any entirely, too much effort
+    "COM812",  # conflicts with formatter
+    "D1",      # wants docstrings everywhere, too much effort
+    "D2",      # wants overly specific conventions for docstrings
+    "D4",      # wants overly specific conventions for docstrings
+    "FIX",     # wants to avoid using TODO comments
+    "ISC001",  # conflicts with formatter
+    "PLR0913", # wants to limit the number of arguments in functions
+    "S311",    # wants to avoid using random library
+    "SIM102",  # wants to avoid nested if statements
+    "SIM108",  # wants to use ternary operations everywhere
+    "TD002",   # wants TODO comments to contain author
+    "TD003",   # wants TODO comments to contain issue link
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/factoreally/analyzers/*.py" = [
+    "PLR2004", # wants to avoid using magic numbers
+]
+"tests/**/*.py" = [
+    "PLR2004", # wants to avoid using magic values
+    "S101",    # wants to avoid using assert statements
+    "SLF001",  # wants to avoid accessing private attributes
+]
+
+[tool.uv.workspace]
+members = [
+    "factoreally",
+]

@@ -1,0 +1,1 @@
+"""Factory specification tests."""

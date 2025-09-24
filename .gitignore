@@ -1,0 +1,9 @@
+.claude/
+.coverage
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.serena
+.venv/
+__pycache__/
+dist/
