@@ -61,7 +61,7 @@ def create(input_path: Path, output_path: Path, model: str | None = None) -> Non
     json_spec = create_spec(items, model=pydantic_model)
 
     # Display analysis results (CLI-specific)
-    _display_analysis_results(json_spec, start_time, len(items))
+    _display_analysis_results(json_spec, start_time)
 
     # Write the spec to file
     click.echo()
@@ -82,18 +82,17 @@ def _json_serializer(obj: Any) -> Any:
     return str(obj)
 
 
-def _display_analysis_results(json_spec: dict[str, Any], start_time: float, item_count: int) -> None:
+def _display_analysis_results(json_spec: dict[str, Any], start_time: float) -> None:
     """Display analysis results and performance metrics."""
+    # Get stats from the spec
+    metadata = json_spec["metadata"]
+    item_count = metadata["samples_analyzed"]
+    data_point_count = metadata["data_points"]
+
     # Calculate performance metrics
     end_time = time.time()
     total_time = end_time - start_time
     items_per_sec = item_count / total_time if total_time > 0 else 0
-
-    # Get stats from the spec
-    metadata = json_spec.get("metadata", {})
-    unique_fields = metadata.get("unique_fields", 0)
-    total_data_points = metadata.get("total_data_points", 0)
-    samples_analyzed = metadata.get("samples_analyzed", item_count)
 
     click.echo()
     click.secho("=" * 60, fg="green")
@@ -101,18 +100,14 @@ def _display_analysis_results(json_spec: dict[str, Any], start_time: float, item
     click.secho("=" * 60, fg="green")
 
     # Core metrics
-    click.secho(f"Items analyzed: {samples_analyzed:,}", fg="cyan")
-    click.secho(f"Unique fields: {unique_fields:,}", fg="cyan")
-    click.secho(f"Total data points: {total_data_points:,}", fg="cyan")
+    click.secho(f"Samples analyzed: {item_count:,}", fg="cyan")
+    click.secho(f"Total data points: {data_point_count:,}", fg="cyan")
 
     # Performance metrics
     click.echo()
     click.secho("Performance Metrics:", fg="magenta", bold=True)
     click.secho(f"  • Total processing time: {total_time:.2f}s", fg="yellow")
     click.secho(f"  • Processing rate: {items_per_sec:.1f} items/sec", fg="yellow")
-    if unique_fields > 0:
-        fields_per_sec = unique_fields / total_time if total_time > 0 else 0
-        click.secho(f"  • Field analysis rate: {fields_per_sec:.1f} fields/sec", fg="yellow")
 
 
 if __name__ == "__main__":

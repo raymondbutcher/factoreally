@@ -17,8 +17,7 @@ def test_create_spec_empty_list() -> None:
     assert spec_data == {
         "metadata": {
             "samples_analyzed": 1,
-            "total_data_points": 1,
-            "unique_fields": 1,
+            "data_points": 0,
         },
         "fields": {
             "timestamps": {
@@ -46,8 +45,7 @@ def test_create_spec_list_timestamps() -> None:
     assert spec_data == {
         "metadata": {
             "samples_analyzed": 3,
-            "total_data_points": 2,
-            "unique_fields": 2,
+            "data_points": 5,
         },
         "fields": {
             "timestamps": {
@@ -88,8 +86,7 @@ def test_create_spec_nested_objects() -> None:
     assert spec_data == {
         "metadata": {
             "samples_analyzed": 8,
-            "total_data_points": 14,
-            "unique_fields": 3,
+            "data_points": 3,
         },
         "fields": {
             "data": {

@@ -13,7 +13,6 @@ def test_extract_data_empty_input() -> None:
     assert result.item_count == 0
     assert result.data_point_count == 0
     assert len(result.field_paths) == 0
-    assert len(result.field_presence) == 0
 
 
 def test_extract_data_simple_objects() -> None:
@@ -30,8 +29,6 @@ def test_extract_data_simple_objects() -> None:
     assert result.data_point_count > 0
     assert "name" in result.field_paths
     assert "age" in result.field_paths
-    assert result.field_presence["name"] == 3  # Present in all items
-    assert result.field_presence["age"] == 2  # Present in 2 items
 
 
 def test_extract_data_nested_objects() -> None:
@@ -48,9 +45,6 @@ def test_extract_data_nested_objects() -> None:
     assert "user.name" in result.field_paths
     assert "user.profile" in result.field_paths
     assert "user.profile.age" in result.field_paths
-    assert result.field_presence["user"] == 2
-    assert result.field_presence["user.name"] == 2
-    assert result.field_presence["user.profile.age"] == 1
 
 
 def test_extract_data_with_arrays() -> None:
@@ -66,7 +60,6 @@ def test_extract_data_with_arrays() -> None:
 
     assert result.item_count == 3
     assert "tags" in result.field_paths
-    assert result.field_presence["tags"] == 3
     # Array lengths are now tracked by the ArrayAnalyzer
     assert "tags" in az.array_analyzer.field_length_counts
     assert 2 in az.array_analyzer.field_length_counts["tags"]  # Length 2 array

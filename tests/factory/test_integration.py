@@ -93,6 +93,10 @@ def test_pydantic_model_integration() -> None:
 
     # Assert the complete spec structure
     expected_spec = {
+        "metadata": {
+            "samples_analyzed": 4,
+            "data_points": 23,
+        },
         "fields": {
             "dynamic": {
                 "OBJECT": {},
@@ -117,11 +121,6 @@ def test_pydantic_model_integration() -> None:
             "name": {"CHOICE": {"choices": ["Alice", "Bob", "Carol", "Jan"], "weights": [0.25, 0.25, 0.25, 0.25]}},
             "nested": {"NULL": {"pct": 33.333}, "MISSING": {"pct": 25.0}},
             "nested.height": {"NUMBER": {"min": 160, "max": 170}},
-        },
-        "metadata": {
-            "samples_analyzed": 4,
-            "total_data_points": 24,
-            "unique_fields": 7,
         },
     }
 
@@ -180,8 +179,7 @@ def test_dynamic_object_with_date_string_keys() -> None:
     expected_spec = {
         "metadata": {
             "samples_analyzed": 2,
-            "unique_fields": 4,
-            "total_data_points": 18,
+            "data_points": 16,
         },
         "fields": {
             "daily_metrics": {
@@ -242,8 +240,7 @@ def test_dynamic_object_with_date_keys() -> None:
     expected_spec = {
         "metadata": {
             "samples_analyzed": 2,
-            "unique_fields": 4,
-            "total_data_points": 18,
+            "data_points": 16,
         },
         "fields": {
             "daily_metrics": {

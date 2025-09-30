@@ -10,12 +10,7 @@ from factoreally.hints.base import AnalysisHint, SimpleType
 class ChoiceAnalyzer:
     def __init__(self) -> None:
         """Initialize choice analyzer."""
-        self.field_presence_counts: dict[str, int] = {}
         self.fields_with_too_many_values: dict[str, int] = {}
-
-    def set_field_presence(self, field_presence: dict[str, int]) -> None:
-        """Set field presence information from ExtractedData."""
-        self.field_presence_counts = field_presence
 
     def get_hint(self, field: str, value_counts: Counter[SimpleType]) -> AnalysisHint | None:
         """Generate structured hint for choice field factory generation."""

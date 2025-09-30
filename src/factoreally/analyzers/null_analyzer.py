@@ -1,6 +1,7 @@
 """Null value analysis for field nullability patterns in sample data."""
 
 from collections import defaultdict
+from typing import Any
 
 from factoreally.constants import MAX_PRECISION
 from factoreally.hints import NullHint
@@ -15,13 +16,10 @@ class NullAnalyzer:
         self.field_null_counts: dict[str, int] = defaultdict(int)
         self.field_presence_counts: dict[str, int] = defaultdict(int)
 
-    def set_field_presence(self, field_presence: dict[str, int]) -> None:
-        """Set field presence information from ExtractedData."""
-        self.field_presence_counts = field_presence
-
-    def set_field_null_counts(self, field_null_counts: dict[str, int]) -> None:
-        """Set field null counts from ExtractedData."""
-        self.field_null_counts = field_null_counts
+    def collect_one(self, field: str, value: Any) -> None:
+        self.field_presence_counts[field] += 1
+        if value is None:
+            self.field_null_counts[field] += 1
 
     def get_hint(self, field: str) -> AnalysisHint | None:
         """Generate nullability hint for factory generation."""

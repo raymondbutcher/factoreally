@@ -21,7 +21,7 @@ def test_load_factory_spec_from_dict() -> None:
 def test_load_factory_spec_with_metadata() -> None:
     """Test loading FactorySpec from dictionary with metadata."""
     spec_dict = {
-        "metadata": {"generated": "2024-01-01", "samples_analyzed": 100, "unique_fields": 2},
+        "metadata": {},
         "fields": {
             "id": {"CONST": {"val": 1}},
             "name": {"CONST": {"val": "test_user"}},

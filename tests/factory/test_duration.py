@@ -9,11 +9,7 @@ from factoreally import Factory
 def test_factory_dynamic_duration_spec() -> None:
     """Test Factory with dynamic duration spec using HMS format."""
     spec = {
-        "metadata": {
-            "samples_analyzed": 2,
-            "unique_fields": 3,
-            "total_data_points": 11,
-        },
+        "metadata": {},
         "fields": {
             "hourlyMetrics": {
                 "OBJECT": {},
@@ -53,11 +49,7 @@ def test_factory_dynamic_duration_spec() -> None:
 def test_factory_dynamic_duration_dhms_spec() -> None:
     """Test Factory with dynamic duration spec using D.HMS format."""
     spec = {
-        "metadata": {
-            "samples_analyzed": 2,
-            "unique_fields": 3,
-            "total_data_points": 11,
-        },
+        "metadata": {},
         "fields": {
             "processMetrics": {
                 "OBJECT": {},
@@ -97,11 +89,7 @@ def test_factory_dynamic_duration_dhms_spec() -> None:
 def test_factory_dynamic_duration_dhms_fractional_spec() -> None:
     """Test Factory with dynamic duration spec using D.HMS.F format (fractional seconds)."""
     spec = {
-        "metadata": {
-            "samples_analyzed": 3,
-            "unique_fields": 3,
-            "total_data_points": 15,
-        },
+        "metadata": {},
         "fields": {
             "precisionMetrics": {
                 "OBJECT": {},

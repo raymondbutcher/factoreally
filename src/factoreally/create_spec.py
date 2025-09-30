@@ -48,16 +48,6 @@ def create_spec(items: Iterable[dict[str, Any]], *, model: type[BaseModel] | Non
     ) as progress_items:
         extracted = extract_data(progress_items, az=az, model=model)
 
-    az.null_analyzer.set_field_presence(extracted.field_presence)
-    az.null_analyzer.set_field_null_counts(extracted.field_null_counts)
-    az.choice_analyzer.set_field_presence(extracted.field_presence)
-    az.presence_analyzer.calculate(
-        field_presences=extracted.field_presence,
-        total_items=extracted.item_count,
-        discovered_fields=extracted.field_paths,
-        parent_presence=extracted.parent_presence,
-    )
-
     with click.progressbar(
         length=(
             len(extracted.field_value_counts)

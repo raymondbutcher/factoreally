@@ -31,17 +31,9 @@ def build_json_spec(
     Returns:
         Dict containing the complete factory spec with metadata and field definitions
     """
-    # Build JSON spec structure
-    json_spec: dict[str, Any] = {
-        "metadata": {
-            "samples_analyzed": extracted.item_count,
-            "unique_fields": len(extracted.field_paths),
-            "total_data_points": extracted.data_point_count,
-        },
-        "fields": {},
-    }
 
     # Collect field data - only include fields with hints
+    fields = {}
     for field in sorted(extracted.field_paths):
         field_hints = {}
         for hint in _get_hints(field, extracted, analyzers):
@@ -53,12 +45,19 @@ def build_json_spec(
             field_hints[hint_type] = filtered_hint
         # Only include fields that have hints
         if field_hints:
-            json_spec["fields"][field] = field_hints
+            fields[field] = field_hints
 
         if progress_callback:
             progress_callback(1)
 
-    return json_spec
+    # Build JSON spec structure
+    return {
+        "metadata": {
+            "samples_analyzed": extracted.item_count,
+            "data_points": extracted.data_point_count,
+        },
+        "fields": fields,
+    }
 
 
 def _get_hints(
