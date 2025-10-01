@@ -1,10 +1,18 @@
 """Text hint for generating lorem ipsum text with length distribution."""
 
-from collections.abc import Callable
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any, Self
 
 from factoreally.hints.number_hint import NumberHint
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+# Text detection thresholds
+MIN_TEXT_LENGTH = 30
+MIN_SPACES = 5
 
 # Built-in lorem ipsum words
 LOREM_WORDS = [
@@ -78,6 +86,36 @@ class TextHint(NumberHint):
     """Hint for generating lorem ipsum text with length distribution."""
 
     type: str = "TEXT"
+
+    @classmethod
+    def create_from_values(cls, values: list[str]) -> Self | None:
+        """Create TextHint from sample values if they match text pattern.
+
+        Detection logic: ≥25% of values are 'long strings' (>30 chars with ≥5 spaces).
+        """
+        if not values:
+            return None
+
+        # Check if at least 25% of values are long strings with multiple spaces
+        long_text_count = 0
+        lengths = []
+
+        for value in values:
+            lengths.append(len(value))
+            # Count spaces in the value
+            space_count = value.count(" ")
+            if len(value) > MIN_TEXT_LENGTH and space_count >= MIN_SPACES:
+                long_text_count += 1
+
+        # Require more than 25% of values to be long text with multiple spaces
+        threshold = len(values) * 0.25
+        if long_text_count <= threshold:
+            return None
+
+        return cls(
+            min=min(lengths),
+            max=max(lengths),
+        )
 
     def process_value(self, value: Any, call_next: Callable[[Any], Any]) -> Any:
         """Process value through text hint - generate lorem ipsum if no input, continue chain."""

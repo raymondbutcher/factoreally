@@ -1,11 +1,17 @@
 """Alphanumeric hint for generating alphanumeric strings."""
 
-import random
-from collections.abc import Callable
-from dataclasses import dataclass
-from typing import Any
+from __future__ import annotations
 
+import random
+from collections import defaultdict
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Self
+
+from factoreally.constants import MIN_VALUES_FOR_ALPLHANUMERIC
 from factoreally.hints.base import AnalysisHint
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -14,6 +20,33 @@ class AlphanumericHint(AnalysisHint):
 
     type: str = "ALPHA"
     chrs: dict[str, list[int]]
+
+    @classmethod
+    def create_from_values(cls, values: list[str]) -> Self | None:
+        """Create AlphanumericHint for fixed-length alphanumeric patterns."""
+        if len(values) < MIN_VALUES_FOR_ALPLHANUMERIC:
+            return None
+
+        # Check if all values are the same length
+        lengths = {len(v) for v in values}
+        if len(lengths) != 1:
+            return None
+
+        # Collect characters at each position
+        char_positions: dict[int, set[str]] = defaultdict(set)
+        for value in values:
+            for i, char in enumerate(value):
+                char_positions[i].add(char)
+
+        # Build efficient character set groupings
+        charset_to_positions: dict[str, list[int]] = {}
+        for pos, char_set in char_positions.items():
+            charset = "".join(sorted(char_set))
+            if charset not in charset_to_positions:
+                charset_to_positions[charset] = []
+            charset_to_positions[charset].append(pos)
+
+        return cls(chrs=charset_to_positions)
 
     def process_value(self, value: Any, call_next: Callable[[Any], Any]) -> Any:
         """Process value through alphanumeric hint - generate if no input, continue chain."""

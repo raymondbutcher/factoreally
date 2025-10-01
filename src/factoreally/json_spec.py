@@ -95,8 +95,6 @@ def _get_value_hint(az: Analyzers, field: str, value_counts: Counter[SimpleType]
         return hint
     if hint := az.string_pattern_analyzer.get_hint(field):
         return hint
-    if hint := az.alphanumeric_analyzer.get_hint(field):
-        return hint
     if hint := az.choice_analyzer.get_hint(field, value_counts):
         return hint
     return None

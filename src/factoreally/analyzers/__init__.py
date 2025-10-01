@@ -6,7 +6,6 @@ analyzers to perform analysis of sample data.
 
 from __future__ import annotations
 
-from factoreally.analyzers.alphanumeric_analyzer import AlphanumericAnalyzer
 from factoreally.analyzers.array_analyzer import ArrayAnalyzer
 from factoreally.analyzers.choice_analyzer import ChoiceAnalyzer
 from factoreally.analyzers.null_analyzer import NullAnalyzer
@@ -21,7 +20,6 @@ class Analyzers:
 
     def __init__(self) -> None:
         """Initialize all analyzers, passing self as the Analyzers instance."""
-        self.alphanumeric_analyzer = AlphanumericAnalyzer(self)
         self.array_analyzer = ArrayAnalyzer(self)
         self.choice_analyzer = ChoiceAnalyzer(self)
         self.null_analyzer = NullAnalyzer(self)

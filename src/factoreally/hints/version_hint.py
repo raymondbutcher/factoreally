@@ -1,11 +1,16 @@
 """Version hint for generating semantic version strings."""
 
+from __future__ import annotations
+
 import random
-from collections.abc import Callable
+import re
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any, Self
 
 from factoreally.hints.base import AnalysisHint
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -16,6 +21,17 @@ class VersionHint(AnalysisHint):
 
     examples: list[str] | None = None
     pattern_type: str
+
+    @classmethod
+    def create_from_values(cls, values: list[str]) -> Self | None:
+        """Create VersionHint from sample values if they match version patterns."""
+        # Try full version pattern (x.y.z or x.y.z.w)
+        if all(re.match(r"^\d+\.\d+\.\d+(\.\d+)?$", v) for v in values):
+            return cls(pattern_type="Version", examples=values[:3])
+        # Try short version pattern (x.y)
+        if all(re.match(r"^\d+\.\d+$", v) for v in values):
+            return cls(pattern_type="Version_Short")
+        return None
 
     def process_value(self, value: Any, call_next: Callable[[Any], Any]) -> Any:
         """Process value through version hint - generate if no input, continue chain."""

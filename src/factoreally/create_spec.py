@@ -69,8 +69,7 @@ def create_spec(items: Iterable[dict[str, Any]], *, model: type[BaseModel] | Non
 
         for field, value_counts in extracted.field_value_counts.items():
             if not az.numeric_analyzer.analyze_field_value_counts(field, value_counts):
-                if not az.string_pattern_analyzer.analyze_field_value_counts(field, value_counts):
-                    az.alphanumeric_analyzer.analyze_field_value_counts(field, value_counts)
+                az.string_pattern_analyzer.analyze_field_value_counts(field, value_counts)
             bar.update(1)
 
     field_count = len(extracted.field_paths)
