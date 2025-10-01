@@ -51,26 +51,26 @@ def create_spec(items: Iterable[dict[str, Any]], *, model: type[BaseModel] | Non
     with click.progressbar(
         length=(
             len(extracted.field_value_counts)
-            + len(az.array_analyzer.field_length_counts)
-            + len(az.object_analyzer.field_key_counts)
+            + len(az.array_analyzer.array_fields)
+            + len(az.object_analyzer.dynamic_object_fields)
         ),
         label="(2/3) Analysis",
         show_eta=True,
         show_percent=True,
         show_pos=True,
     ) as bar:
-        for field in az.object_analyzer.field_key_counts:
-            az.object_analyzer.analyze_all(field, az)
+        for field in az.object_analyzer.dynamic_object_fields:
+            az.object_analyzer.analyze_field(field)
             bar.update(1)
 
-        for field in az.array_analyzer.field_length_counts:
-            az.array_analyzer.analyze_all(field, az)
+        for field in az.array_analyzer.array_fields:
+            az.array_analyzer.analyze_field(field)
             bar.update(1)
 
         for field, value_counts in extracted.field_value_counts.items():
-            if not az.numeric_analyzer.analyze_all(field, value_counts):
-                if not az.string_pattern_analyzer.analyze_all(field, value_counts):
-                    az.alphanumeric_analyzer.analyze_all(field, value_counts)
+            if not az.numeric_analyzer.analyze_field_value_counts(field, value_counts):
+                if not az.string_pattern_analyzer.analyze_field_value_counts(field, value_counts):
+                    az.alphanumeric_analyzer.analyze_field_value_counts(field, value_counts)
             bar.update(1)
 
     field_count = len(extracted.field_paths)

@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from collections import Counter, defaultdict
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
+from factoreally.analyzers.base import FieldAnalyzer, FieldValueCollector
 from factoreally.hints import ArrayHint
 
 if TYPE_CHECKING:
@@ -12,30 +13,33 @@ if TYPE_CHECKING:
     from factoreally.hints.base import AnalysisHint, SimpleType
 
 
-class ArrayAnalyzer:
+class ArrayAnalyzer(FieldValueCollector, FieldAnalyzer):
     """Analyzes array lengths for factory generation."""
 
-    def __init__(self) -> None:
-        self.field_length_counts: dict[str, Counter[SimpleType]] = defaultdict(Counter)
+    def __init__(self, az: Analyzers) -> None:
+        self._az = az
+        self._field_length_counts: dict[str, Counter[SimpleType]] = defaultdict(Counter)
 
-    def collect_one(
-        self,
-        field: str,
-        array_size: int,
-    ) -> None:
+    @property
+    def array_fields(self) -> list[str]:
+        return list(self._field_length_counts.keys())
+
+    def collect_field_value(self, field: str, value: Any) -> None:
         """Collect information about a field in one item"""
-        self.field_length_counts[field][array_size] += 1
+        if not isinstance(value, list):
+            raise TypeError(type(value))
+        self._field_length_counts[field][len(value)] += 1
 
-    def analyze_all(self, field: str, az: Analyzers) -> None:
+    def analyze_field(self, field: str) -> None:
         """Analyze all array lengths for a field across all items"""
-        if field in self.field_length_counts:
+        if field in self._field_length_counts:
             meta_field = field + "#"
-            length_counts = self.field_length_counts[field]
-            az.numeric_analyzer.analyze_all(meta_field, length_counts)
+            length_counts = self._field_length_counts[field]
+            self._az.numeric_analyzer.analyze_field_value_counts(meta_field, length_counts)
 
-    def get_hints(self, field: str, az: Analyzers) -> list[AnalysisHint]:
-        if field in self.field_length_counts:
+    def get_hints(self, field: str) -> list[AnalysisHint]:
+        if field in self._field_length_counts:
             meta_field = field + "#"
-            if length_hint := az.numeric_analyzer.get_hint(meta_field):
+            if length_hint := self._az.numeric_analyzer.get_hint(meta_field):
                 return [ArrayHint(), length_hint]
         return []

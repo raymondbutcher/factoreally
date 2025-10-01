@@ -61,10 +61,10 @@ def test_extract_data_with_arrays() -> None:
     assert result.item_count == 3
     assert "tags" in result.field_paths
     # Array lengths are now tracked by the ArrayAnalyzer
-    assert "tags" in az.array_analyzer.field_length_counts
-    assert 2 in az.array_analyzer.field_length_counts["tags"]  # Length 2 array
-    assert 1 in az.array_analyzer.field_length_counts["tags"]  # Length 1 array
-    assert 0 in az.array_analyzer.field_length_counts["tags"]  # Length 0 array
+    assert "tags" in az.array_analyzer._field_length_counts
+    assert 2 in az.array_analyzer._field_length_counts["tags"]  # Length 2 array
+    assert 1 in az.array_analyzer._field_length_counts["tags"]  # Length 1 array
+    assert 0 in az.array_analyzer._field_length_counts["tags"]  # Length 0 array
 
 
 def test_extract_data_value_counting() -> None:

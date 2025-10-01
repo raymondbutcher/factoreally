@@ -73,16 +73,16 @@ def _extract_value(
 
     data_point_count = 0
 
-    az.presence_analyzer.collect_one(field, value)
+    az.presence_analyzer.collect_field_value(field, value)
 
     if field:
         ed.field_paths.add(field)
-        az.null_analyzer.collect_one(field, value)
+        az.null_analyzer.collect_field_value(field, value)
 
     if isinstance(value, dict):
         if field.replace("[]", "") in ed.dynamic_object_fields:
             # For dynamic objects with patterns, create a {} field to capture value patterns
-            az.object_analyzer.collect_one(field, value.keys())
+            az.object_analyzer.collect_field_value(field, value)
             data_point_count += len(value.keys())
             child_field = field + ".{}"
             for child_value in value.values():
@@ -93,7 +93,7 @@ def _extract_value(
                 data_point_count += _extract_value(child_field, child_value, ed, az)
 
     elif isinstance(value, list):
-        az.array_analyzer.collect_one(field, len(value))
+        az.array_analyzer.collect_field_value(field, value)
         child_field = field + "[]"
         for child_value in value:
             data_point_count += _extract_value(child_field, child_value, ed, az)

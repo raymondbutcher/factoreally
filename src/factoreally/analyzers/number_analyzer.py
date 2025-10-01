@@ -1,15 +1,23 @@
 """Numeric analysis for sample data including statistical distribution analysis."""
 
-from collections import Counter
-from collections.abc import KeysView
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import numpy as np
 from scipy import stats
 
+from factoreally.analyzers.base import FieldValueCountsAnalyzer
 from factoreally.constants import MAX_PRECISION
 from factoreally.hints import ConstantValueHint, NumberHint
-from factoreally.hints.base import AnalysisHint, SimpleType
+
+if TYPE_CHECKING:
+    from collections import Counter
+    from collections.abc import KeysView
+
+    from factoreally.analyzers import Analyzers
+    from factoreally.hints.base import AnalysisHint, SimpleType
 
 
 @dataclass
@@ -46,13 +54,14 @@ class OutlierAnalysis:
     bounds: OutlierBounds
 
 
-class NumericAnalyzer:
+class NumericAnalyzer(FieldValueCountsAnalyzer):
     """Analyzes numeric data for factory generation including statistical distributions."""
 
-    def __init__(self) -> None:
-        self.field_hints: dict[str, AnalysisHint] = {}
+    def __init__(self, az: Analyzers) -> None:
+        self._az = az
+        self._field_hints: dict[str, AnalysisHint] = {}
 
-    def analyze_all(
+    def analyze_field_value_counts(
         self,
         field: str,
         value_counts: Counter[SimpleType],
@@ -75,14 +84,14 @@ class NumericAnalyzer:
         precision = None if is_integer else _calculate_precision(value_counts.keys())
 
         if len(value_counts.keys()) == 1:
-            self.field_hints[field] = NumberHint(
+            self._field_hints[field] = NumberHint(
                 min=values[0],
                 max=values[0],
             )
         elif hint := _get_best_distribution_hint(values, precision):
-            self.field_hints[field] = hint
+            self._field_hints[field] = hint
         else:
-            self.field_hints[field] = NumberHint(
+            self._field_hints[field] = NumberHint(
                 min=round(min(values), precision),
                 max=round(max(values), precision),
                 prec=precision,
@@ -91,7 +100,7 @@ class NumericAnalyzer:
         return True
 
     def get_hint(self, field: str) -> AnalysisHint | None:
-        return self.field_hints.get(field)
+        return self._field_hints.get(field)
 
 
 def _calculate_precision(values: KeysView[SimpleType]) -> int | None:

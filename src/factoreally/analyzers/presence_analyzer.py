@@ -1,26 +1,32 @@
 """Presence analysis for field presence patterns in sample data."""
 
-from collections import defaultdict
-from typing import Any
+from __future__ import annotations
 
+from collections import defaultdict
+from typing import TYPE_CHECKING, Any
+
+from factoreally.analyzers.base import FieldValueCollector
 from factoreally.constants import MAX_PRECISION
 from factoreally.hints import MissingHint
-from factoreally.hints.base import AnalysisHint
+
+if TYPE_CHECKING:
+    from factoreally.analyzers import Analyzers
+    from factoreally.hints.base import AnalysisHint
 
 
-class PresenceAnalyzer:
+class PresenceAnalyzer(FieldValueCollector):
     """Analyzes field presence patterns in sample data."""
 
-    def __init__(self) -> None:
-        """Initialize presence analyzer."""
-        self.field_counts: dict[str, int] = defaultdict(int)
-        self.parent_field_counts: dict[str, int] = defaultdict(int)
+    def __init__(self, az: Analyzers) -> None:
+        self._az = az
+        self._field_counts: dict[str, int] = defaultdict(int)
+        self._parent_field_counts: dict[str, int] = defaultdict(int)
 
-    def collect_one(self, field: str, value: Any) -> None:
+    def collect_field_value(self, field: str, value: Any) -> None:
         """Collect information about a field in one item"""
-        self.field_counts[field] += 1
+        self._field_counts[field] += 1
         if value is not None:
-            self.parent_field_counts[field] += 1
+            self._parent_field_counts[field] += 1
 
     def _get_parent_path(self, field_path: str) -> str:
         """Get the parent path of a nested field for conditional presence analysis."""
@@ -42,9 +48,9 @@ class PresenceAnalyzer:
             return None
 
         parent_field = self._get_parent_path(field)
-        parent_count = self.parent_field_counts[parent_field]
+        parent_count = self._parent_field_counts[parent_field]
 
-        field_count = self.field_counts[field]
+        field_count = self._field_counts[field]
         percentage = (field_count / parent_count) * 100
 
         # No hint needed for 100% present fields

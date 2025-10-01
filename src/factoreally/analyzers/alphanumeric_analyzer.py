@@ -1,37 +1,40 @@
 """Alphanumeric pattern analysis for general string patterns."""
 
-from collections import Counter, defaultdict
+from __future__ import annotations
 
+from collections import Counter, defaultdict
+from typing import TYPE_CHECKING
+
+from factoreally.analyzers.base import FieldValueCountsAnalyzer
 from factoreally.constants import MIN_VALUES_FOR_ALPLHANUMERIC
 from factoreally.hints import AlphanumericHint
-from factoreally.hints.base import AnalysisHint, SimpleType
+
+if TYPE_CHECKING:
+    from factoreally.analyzers import Analyzers
+    from factoreally.hints.base import AnalysisHint, SimpleType
 
 
-class AlphanumericAnalyzer:
+class AlphanumericAnalyzer(FieldValueCountsAnalyzer):
     """Analyzes general alphanumeric patterns in string data for factory generation."""
 
-    def __init__(self) -> None:
-        """Initialize alphanumeric pattern analyzer."""
-        self.field_hints: dict[str, AnalysisHint] = {}
+    def __init__(self, az: Analyzers) -> None:
+        self._az = az
+        self._field_hints: dict[str, AnalysisHint] = {}
 
-    def analyze_all(
-        self,
-        field: str,
-        value_counts: Counter[SimpleType],
-    ) -> None:
+    def analyze_field_value_counts(self, field: str, value_counts: Counter[SimpleType]) -> bool:
         """Analyze all values for a field across all items"""
         if len(value_counts) < MIN_VALUES_FOR_ALPLHANUMERIC:
-            return
+            return False
 
         # Get all string values
         string_values = [(v, count) for v, count in value_counts.items() if isinstance(v, str)]
         if not string_values or len(string_values) != len(value_counts):
-            return
+            return False
 
         # Check if all values are the same length
         lengths = {len(v) for v, _ in string_values}
         if len(lengths) != 1:
-            return  # Exit early if not all same length
+            return False
 
         # Continue with existing analysis for character position tracking
         char_positions: dict[int, Counter[str]] = defaultdict(Counter)
@@ -50,8 +53,10 @@ class AlphanumericAnalyzer:
 
         # Create and store hint
         hint = AlphanumericHint(chrs=charset_to_positions)
-        self.field_hints[field] = hint
+        self._field_hints[field] = hint
+
+        return True
 
     def get_hint(self, field: str) -> AnalysisHint | None:
         """Return stored hint for the field."""
-        return self.field_hints.get(field)
+        return self._field_hints.get(field)

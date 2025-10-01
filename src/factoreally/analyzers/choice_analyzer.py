@@ -1,15 +1,22 @@
 """Choice analysis for sample data."""
 
-from collections import Counter
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from factoreally.constants import MIN_VALUES_FOR_CHOICE_WARNING
 from factoreally.hints import ChoiceHint, ConstantValueHint
-from factoreally.hints.base import AnalysisHint, SimpleType
+
+if TYPE_CHECKING:
+    from collections import Counter
+
+    from factoreally.analyzers import Analyzers
+    from factoreally.hints.base import AnalysisHint, SimpleType
 
 
 class ChoiceAnalyzer:
-    def __init__(self) -> None:
-        """Initialize choice analyzer."""
+    def __init__(self, az: Analyzers) -> None:
+        self._az = az
         self.fields_with_too_many_values: dict[str, int] = {}
 
     def get_hint(self, field: str, value_counts: Counter[SimpleType]) -> AnalysisHint | None:

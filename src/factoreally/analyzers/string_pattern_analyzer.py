@@ -1,10 +1,12 @@
 """String pattern analysis combining temporal and structured pattern detection."""
 
-import re
-from collections import Counter
-from collections.abc import Callable
-from datetime import UTC, datetime
+from __future__ import annotations
 
+import re
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING
+
+from factoreally.analyzers.base import FieldValueCountsAnalyzer
 from factoreally.constants import MAX_PRECISION
 from factoreally.hints import (
     Auth0IdHint,
@@ -17,7 +19,13 @@ from factoreally.hints import (
     Uuid4Hint,
     VersionHint,
 )
-from factoreally.hints.base import AnalysisHint, SimpleType
+
+if TYPE_CHECKING:
+    from collections import Counter
+    from collections.abc import Callable
+
+    from factoreally.analyzers import Analyzers
+    from factoreally.hints.base import AnalysisHint, SimpleType
 
 
 def create_iso_z_mixed_hint(values: list[str]) -> AnalysisHint | None:
@@ -460,15 +468,14 @@ def _parse_duration_seconds(value: str, pattern_format: str) -> float | None:
     return None
 
 
-class StringPatternAnalyzer:
+class StringPatternAnalyzer(FieldValueCountsAnalyzer):
     """Analyzes string patterns for factory generation."""
 
-    def __init__(self) -> None:
-        """Initialize string pattern analyzer."""
-        # Field -> hint mapping for string patterns
-        self.field_hints: dict[str, AnalysisHint] = {}
+    def __init__(self, az: Analyzers) -> None:
+        self._az = az
+        self._field_hints: dict[str, AnalysisHint] = {}
 
-    def analyze_all(self, field: str, value_counts: Counter[SimpleType]) -> bool:
+    def analyze_field_value_counts(self, field: str, value_counts: Counter[SimpleType]) -> bool:
         """Analyze string values for consistent patterns across ALL values in the field."""
         # Extract all unique string values for this field
         string_values = [value for value in value_counts if isinstance(value, str)]
@@ -480,11 +487,11 @@ class StringPatternAnalyzer:
         for create_hint in PATTERN_HINT_CREATORS:
             hint = create_hint(string_values)
             if hint:
-                self.field_hints[field] = hint
+                self._field_hints[field] = hint
                 return True
 
         return False
 
     def get_hint(self, field: str) -> AnalysisHint | None:
         """Get pattern hint for a field."""
-        return self.field_hints.get(field)
+        return self._field_hints.get(field)

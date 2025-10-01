@@ -77,9 +77,9 @@ def _get_hints(
     """
     value_counts = extracted.field_value_counts.get(field, Counter())
 
-    if array_hints := az.array_analyzer.get_hints(field, az):
+    if array_hints := az.array_analyzer.get_hints(field):
         yield from array_hints
-    elif object_hints := az.object_analyzer.get_hints(field, az):
+    elif object_hints := az.object_analyzer.get_hints(field):
         yield from object_hints
     elif value_hint := _get_value_hint(az, field, value_counts):
         yield value_hint
