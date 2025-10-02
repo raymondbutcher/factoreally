@@ -1,7 +1,7 @@
 """Tests for array length generation using NumberHint."""
 
 from factoreally.hints import NumberHint
-from factoreally.hints.number_hint import NormalDistribution
+from factoreally.hints.number_hint import BetaDistribution, NormalDistribution
 
 
 def test_number_hint_uniform_distribution_for_length() -> None:
@@ -74,3 +74,25 @@ def test_number_hint_type_is_number() -> None:
     """Test that NumberHint has correct type."""
     hint = NumberHint(min=1, max=5)
     assert hint.type == "NUMBER"
+
+
+def test_number_hint_beta_distribution() -> None:
+    """Test NumberHint with beta distribution."""
+    # Beta distribution with typical parameters, using prec to preserve float type
+    hint = NumberHint(min=0.0, max=1.0, prec=2, beta=BetaDistribution(a=2.0, b=5.0, loc=0.0, scale=1.0))
+
+    def mock_call_next(value: float) -> float:
+        return value
+
+    # Test multiple generations
+    results = []
+    for _ in range(50):
+        result = hint.process_value(None, mock_call_next)
+        results.append(result)
+
+    # All results should be floats in the specified range
+    assert all(isinstance(r, float) for r in results)
+    assert all(0.0 <= r <= 1.0 for r in results)
+
+    # Should have some variation
+    assert len(set(results)) > 1

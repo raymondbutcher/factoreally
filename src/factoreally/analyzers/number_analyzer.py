@@ -11,7 +11,7 @@ from scipy import stats
 from factoreally.analyzers.base import FieldValueCountsAnalyzer
 from factoreally.constants import MAX_PRECISION
 from factoreally.hints import ConstantValueHint, NumberHint
-from factoreally.hints.number_hint import GammaDistribution, NormalDistribution
+from factoreally.hints.number_hint import BetaDistribution, GammaDistribution, NormalDistribution
 
 if TYPE_CHECKING:
     from collections import Counter
@@ -312,7 +312,19 @@ def _try_beta_distribution(
         if min_val == max_val:
             return (ConstantValueHint(val=min_val), ks_stat)
 
-        hint = NumberHint(min=min_val, max=max_val, prec=precision)
+        a, b, loc, scale = params
+
+        hint = NumberHint(
+            min=min_val,
+            max=max_val,
+            prec=precision,
+            beta=BetaDistribution(
+                a=round(a, MAX_PRECISION),
+                b=round(b, MAX_PRECISION),
+                loc=round(loc, MAX_PRECISION),
+                scale=round(scale, MAX_PRECISION),
+            ),
+        )
         return (hint, ks_stat)  # noqa: TRY300
     except (ValueError, RuntimeError, TypeError, AttributeError):
         return (None, 0.0)
