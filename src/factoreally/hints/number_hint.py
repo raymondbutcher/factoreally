@@ -1,5 +1,6 @@
 """Number hint for generating numeric values with various distributions."""
 
+import math
 import random
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -32,6 +33,14 @@ class BetaDistribution(NamedTuple):
     scale: float
 
 
+class LognormDistribution(NamedTuple):
+    """Parameters for log-normal distribution."""
+
+    s: float
+    loc: float
+    scale: float
+
+
 @dataclass(frozen=True, kw_only=True)
 class NumberHint(AnalysisHint):
     """Unified hint for numeric distribution generation."""
@@ -47,6 +56,7 @@ class NumberHint(AnalysisHint):
     norm: NormalDistribution | None = None
     gamma: GammaDistribution | None = None
     beta: BetaDistribution | None = None
+    lognorm: LognormDistribution | None = None
 
     def process_value(self, value: Any, call_next: Callable[[Any], Any]) -> Any:
         """Process value through numeric hint - generate if no input, continue chain."""
@@ -60,6 +70,9 @@ class NumberHint(AnalysisHint):
                 value = random.gammavariate(self.gamma.alpha, 1 / self.gamma.beta) + self.gamma.loc
             elif self.beta is not None:
                 value = self.beta.loc + self.beta.scale * random.betavariate(self.beta.a, self.beta.b)
+            elif self.lognorm is not None:
+                mu = math.log(self.lognorm.scale) if self.lognorm.scale > 0 else 0
+                value = random.lognormvariate(mu, self.lognorm.s) + self.lognorm.loc
             elif isinstance(self.min, int) and isinstance(self.max, int):
                 value = random.randint(int(self.min), int(self.max))
             else:
