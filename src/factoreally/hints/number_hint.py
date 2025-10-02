@@ -15,6 +15,14 @@ class NormalDistribution(NamedTuple):
     std: float
 
 
+class GammaDistribution(NamedTuple):
+    """Parameters for gamma distribution."""
+
+    alpha: float
+    beta: float
+    loc: float
+
+
 @dataclass(frozen=True, kw_only=True)
 class NumberHint(AnalysisHint):
     """Unified hint for numeric distribution generation."""
@@ -28,11 +36,7 @@ class NumberHint(AnalysisHint):
 
     # Distribution parameters
     norm: NormalDistribution | None = None
-
-    # Gamma distribution
-    alpha: float | None = None
-    beta: float | None = None
-    loc: float | None = None
+    gamma: GammaDistribution | None = None
 
     def process_value(self, value: Any, call_next: Callable[[Any], Any]) -> Any:
         """Process value through numeric hint - generate if no input, continue chain."""
@@ -43,9 +47,9 @@ class NumberHint(AnalysisHint):
             if self.norm is not None:
                 # Normal distribution
                 value = random.normalvariate(self.norm.mean, self.norm.std)
-            elif self.alpha is not None and self.beta is not None and self.loc is not None:
+            elif self.gamma is not None:
                 # Gamma distribution
-                value = random.gammavariate(self.alpha, 1 / self.beta) + self.loc
+                value = random.gammavariate(self.gamma.alpha, 1 / self.gamma.beta) + self.gamma.loc
             # Uniform distribution
             elif isinstance(self.min, int) and isinstance(self.max, int):
                 value = random.randint(int(self.min), int(self.max))

@@ -11,7 +11,7 @@ from scipy import stats
 from factoreally.analyzers.base import FieldValueCountsAnalyzer
 from factoreally.constants import MAX_PRECISION
 from factoreally.hints import ConstantValueHint, NumberHint
-from factoreally.hints.number_hint import NormalDistribution
+from factoreally.hints.number_hint import GammaDistribution, NormalDistribution
 
 if TYPE_CHECKING:
     from collections import Counter
@@ -272,9 +272,11 @@ def _try_gamma_distribution(
             min=min_val,
             max=max_val,
             prec=precision,
-            alpha=round(alpha, MAX_PRECISION),
-            beta=round(beta, MAX_PRECISION),
-            loc=round(loc, MAX_PRECISION),
+            gamma=GammaDistribution(
+                alpha=round(alpha, MAX_PRECISION),
+                beta=round(beta, MAX_PRECISION),
+                loc=round(loc, MAX_PRECISION),
+            ),
         )
         return (hint, ks_stat)  # noqa: TRY300
     except (ValueError, RuntimeError, TypeError, AttributeError):
