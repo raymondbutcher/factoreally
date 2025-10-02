@@ -41,6 +41,13 @@ class LognormDistribution(NamedTuple):
     scale: float
 
 
+class ExponentialDistribution(NamedTuple):
+    """Parameters for exponential distribution."""
+
+    loc: float
+    scale: float
+
+
 @dataclass(frozen=True, kw_only=True)
 class NumberHint(AnalysisHint):
     """Unified hint for numeric distribution generation."""
@@ -57,6 +64,7 @@ class NumberHint(AnalysisHint):
     gamma: GammaDistribution | None = None
     beta: BetaDistribution | None = None
     lognorm: LognormDistribution | None = None
+    expon: ExponentialDistribution | None = None
 
     def process_value(self, value: Any, call_next: Callable[[Any], Any]) -> Any:
         """Process value through numeric hint - generate if no input, continue chain."""
@@ -73,6 +81,9 @@ class NumberHint(AnalysisHint):
             elif self.lognorm is not None:
                 mu = math.log(self.lognorm.scale) if self.lognorm.scale > 0 else 0
                 value = random.lognormvariate(mu, self.lognorm.s) + self.lognorm.loc
+            elif self.expon is not None:
+                lambd = 1 / self.expon.scale if self.expon.scale > 0 else 1
+                value = random.expovariate(lambd) + self.expon.loc
             elif isinstance(self.min, int) and isinstance(self.max, int):
                 value = random.randint(int(self.min), int(self.max))
             else:
