@@ -68,9 +68,6 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"src/factoreally/analyzers/*.py" = [
-    "PLR2004", # wants to avoid using magic numbers
-]
 "tests/**/*.py" = [
     "PLR2004", # wants to avoid using magic values
     "S101",    # wants to avoid using assert statements

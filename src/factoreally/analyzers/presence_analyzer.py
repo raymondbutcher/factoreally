@@ -54,7 +54,7 @@ class PresenceAnalyzer(FieldValueCollector):
         percentage = (field_count / parent_count) * 100
 
         # No hint needed for 100% present fields
-        if percentage == 100:
+        if percentage == 100:  # noqa: PLR2004
             return None
 
         return MissingHint(pct=round(100 - percentage, MAX_PRECISION))

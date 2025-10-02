@@ -22,7 +22,7 @@ class ChoiceAnalyzer:
     def get_hint(self, field: str, value_counts: Counter[SimpleType]) -> AnalysisHint | None:
         """Generate structured hint for choice field factory generation."""
 
-        if len(value_counts) >= 2:
+        if len(value_counts) >= 2:  # noqa: PLR2004
             if len(value_counts) > MIN_VALUES_FOR_CHOICE_WARNING:
                 self.fields_with_too_many_values[field] = len(value_counts)
             return ChoiceHint.create(value_counts)

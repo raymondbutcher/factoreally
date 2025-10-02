@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any
 
 from factoreally.hints.number_hint import NumberHint
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Sequence
+
+    from factoreally.hints.base import AnalysisHint, SimpleType
 
 # Text detection thresholds
 MIN_TEXT_LENGTH = 30
@@ -88,7 +90,7 @@ class TextHint(NumberHint):
     type: str = "TEXT"
 
     @classmethod
-    def create_from_values(cls, values: list[str]) -> Self | None:
+    def create_from_values(cls, values: Sequence[SimpleType]) -> AnalysisHint | None:
         """Create TextHint from sample values if they match text pattern.
 
         Detection logic: ≥25% of values are 'long strings' (>30 chars with ≥5 spaces).
@@ -101,6 +103,8 @@ class TextHint(NumberHint):
         lengths = []
 
         for value in values:
+            if not isinstance(value, str):
+                return None
             lengths.append(len(value))
             # Count spaces in the value
             space_count = value.count(" ")
