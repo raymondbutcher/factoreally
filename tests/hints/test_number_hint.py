@@ -6,6 +6,7 @@ from factoreally.hints.number_hint import (
     ExponentialDistribution,
     LognormDistribution,
     NormalDistribution,
+    WeibullDistribution,
 )
 
 
@@ -142,6 +143,28 @@ def test_number_hint_expon_distribution() -> None:
     # All results should be floats in the specified range
     assert all(isinstance(r, float) for r in results)
     assert all(0.0 <= r <= 5.0 for r in results)
+
+    # Should have some variation
+    assert len(set(results)) > 1
+
+
+def test_number_hint_weibull_distribution() -> None:
+    """Test NumberHint with Weibull distribution."""
+    # Weibull distribution with typical parameters, using prec to preserve float type
+    hint = NumberHint(min=0.1, max=5.0, prec=2, weibull=WeibullDistribution(c=1.5, loc=0.0, scale=1.0))
+
+    def mock_call_next(value: float) -> float:
+        return value
+
+    # Test multiple generations
+    results = []
+    for _ in range(50):
+        result = hint.process_value(None, mock_call_next)
+        results.append(result)
+
+    # All results should be floats in the specified range
+    assert all(isinstance(r, float) for r in results)
+    assert all(0.1 <= r <= 5.0 for r in results)
 
     # Should have some variation
     assert len(set(results)) > 1

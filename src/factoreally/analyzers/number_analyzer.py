@@ -17,6 +17,7 @@ from factoreally.hints.number_hint import (
     GammaDistribution,
     LognormDistribution,
     NormalDistribution,
+    WeibullDistribution,
 )
 
 if TYPE_CHECKING:
@@ -450,7 +451,18 @@ def _try_weibull_distribution(
         if min_val == max_val:
             return (ConstantValueHint(val=min_val), ks_stat)
 
-        hint = NumberHint(min=min_val, max=max_val, prec=precision)
+        c, loc, scale = params
+
+        hint = NumberHint(
+            min=min_val,
+            max=max_val,
+            prec=precision,
+            weibull=WeibullDistribution(
+                c=round(c, MAX_PRECISION),
+                loc=round(loc, MAX_PRECISION),
+                scale=round(scale, MAX_PRECISION),
+            ),
+        )
         return (hint, ks_stat)  # noqa: TRY300
     except (ValueError, RuntimeError, TypeError, AttributeError):
         return (None, 0.0)

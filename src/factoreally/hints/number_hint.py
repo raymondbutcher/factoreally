@@ -48,6 +48,14 @@ class ExponentialDistribution(NamedTuple):
     scale: float
 
 
+class WeibullDistribution(NamedTuple):
+    """Parameters for Weibull distribution."""
+
+    c: float
+    loc: float
+    scale: float
+
+
 @dataclass(frozen=True, kw_only=True)
 class NumberHint(AnalysisHint):
     """Unified hint for numeric distribution generation."""
@@ -65,6 +73,7 @@ class NumberHint(AnalysisHint):
     beta: BetaDistribution | None = None
     lognorm: LognormDistribution | None = None
     expon: ExponentialDistribution | None = None
+    weibull: WeibullDistribution | None = None
 
     def process_value(self, value: Any, call_next: Callable[[Any], Any]) -> Any:
         """Process value through numeric hint - generate if no input, continue chain."""
@@ -84,6 +93,8 @@ class NumberHint(AnalysisHint):
             elif self.expon is not None:
                 lambd = 1 / self.expon.scale if self.expon.scale > 0 else 1
                 value = random.expovariate(lambd) + self.expon.loc
+            elif self.weibull is not None:
+                value = random.weibullvariate(self.weibull.scale, self.weibull.c) + self.weibull.loc
             elif isinstance(self.min, int) and isinstance(self.max, int):
                 value = random.randint(int(self.min), int(self.max))
             else:
