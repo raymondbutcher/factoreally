@@ -11,6 +11,7 @@ from scipy import stats
 from factoreally.analyzers.base import FieldValueCountsAnalyzer
 from factoreally.constants import MAX_PRECISION
 from factoreally.hints import ConstantValueHint, NumberHint
+from factoreally.hints.number_hint import NormalDistribution
 
 if TYPE_CHECKING:
     from collections import Counter
@@ -197,7 +198,10 @@ def _try_normal_distribution(
             return (ConstantValueHint(val=min_val), ks_stat)
 
         hint = NumberHint(
-            min=min_val, max=max_val, prec=precision, mean=round(mean, MAX_PRECISION), std=round(std, MAX_PRECISION)
+            min=min_val,
+            max=max_val,
+            prec=precision,
+            norm=NormalDistribution(mean=round(mean, MAX_PRECISION), std=round(std, MAX_PRECISION)),
         )
         return (hint, ks_stat)  # noqa: TRY300
     except (ValueError, RuntimeError, TypeError, AttributeError):

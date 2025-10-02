@@ -1,6 +1,7 @@
 """Tests for array length generation using NumberHint."""
 
 from factoreally.hints import NumberHint
+from factoreally.hints.number_hint import NormalDistribution
 
 
 def test_number_hint_uniform_distribution_for_length() -> None:
@@ -27,7 +28,7 @@ def test_number_hint_uniform_distribution_for_length() -> None:
 
 def test_number_hint_normal_distribution_for_length() -> None:
     """Test NumberHint with normal distribution for array length generation."""
-    hint = NumberHint(min=1, max=10, mean=5.0, std=2.0)
+    hint = NumberHint(min=1, max=10, norm=NormalDistribution(mean=5.0, std=2.0))
 
     def mock_call_next(value: int) -> int:
         return value

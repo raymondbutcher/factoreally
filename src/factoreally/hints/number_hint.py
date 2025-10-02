@@ -3,9 +3,16 @@
 import random
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, NamedTuple
 
 from factoreally.hints.base import AnalysisHint
+
+
+class NormalDistribution(NamedTuple):
+    """Parameters for normal distribution."""
+
+    mean: float
+    std: float
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -14,21 +21,18 @@ class NumberHint(AnalysisHint):
 
     type: str = "NUMBER"
 
-    # Required fields
+    # Standard fields
     min: int | float
     max: int | float
+    prec: int | None = None
 
-    # Optional fields for normal distribution
-    mean: float | None = None
-    std: float | None = None
+    # Distribution parameters
+    norm: NormalDistribution | None = None
 
-    # Optional fields for gamma distribution
+    # Gamma distribution
     alpha: float | None = None
     beta: float | None = None
     loc: float | None = None
-
-    # Optional field for precision
-    prec: int | None = None
 
     def process_value(self, value: Any, call_next: Callable[[Any], Any]) -> Any:
         """Process value through numeric hint - generate if no input, continue chain."""
@@ -36,9 +40,9 @@ class NumberHint(AnalysisHint):
             if self.min == self.max:
                 return self.min
             # Determine distribution type based on populated fields
-            if self.mean is not None and self.std is not None:
+            if self.norm is not None:
                 # Normal distribution
-                value = random.normalvariate(self.mean, self.std)
+                value = random.normalvariate(self.norm.mean, self.norm.std)
             elif self.alpha is not None and self.beta is not None and self.loc is not None:
                 # Gamma distribution
                 value = random.gammavariate(self.alpha, 1 / self.beta) + self.loc
