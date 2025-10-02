@@ -1,8 +1,12 @@
 """Tests for create_spec function."""
 
+import json
 from datetime import UTC, datetime, timedelta
 from typing import Any
+from unittest.mock import ANY
 
+from factoreally import Factory
+from factoreally.cli import _json_serializer
 from factoreally.create_spec import create_spec
 
 
@@ -107,3 +111,53 @@ def test_create_spec_nested_objects() -> None:
             },
         },
     }
+
+
+def test_create_spec_normal_distribution() -> None:
+    """Test create_spec with numeric data that gets fitted to a distribution."""
+    sample_data = [
+        {"value": 85},
+        {"value": 92},
+        {"value": 88},
+        {"value": 105},
+        {"value": 110},
+        {"value": 95},
+        {"value": 100},
+        {"value": 98},
+        {"value": 102},
+        {"value": 107},
+        {"value": 93},
+        {"value": 97},
+        {"value": 103},
+        {"value": 90},
+        {"value": 108},
+        {"value": 96},
+        {"value": 101},
+        {"value": 94},
+        {"value": 99},
+        {"value": 104},
+    ]
+
+    spec_data = create_spec(sample_data)
+    normalized_spec = json.loads(json.dumps(spec_data, default=_json_serializer))
+
+    assert normalized_spec == {
+        "metadata": {
+            "samples_analyzed": 20,
+            "data_points": 20,
+        },
+        "fields": {
+            "value": {
+                "NUMBER": {
+                    "min": 80,
+                    "max": 118,
+                    "weibull": [3.815, 76.118, 24.643],
+                },
+            },
+        },
+    }
+
+    factory = Factory(normalized_spec)
+    result = factory.build()
+
+    assert result == {"value": ANY}

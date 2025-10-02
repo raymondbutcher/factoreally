@@ -4,7 +4,7 @@ import math
 import random
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, get_args
 
 from factoreally.hints.base import AnalysisHint
 
@@ -74,6 +74,16 @@ class NumberHint(AnalysisHint):
     lognorm: LognormDistribution | None = None
     expon: ExponentialDistribution | None = None
     weibull: WeibullDistribution | None = None
+
+    def __post_init__(self) -> None:
+        """Convert list arguments to NamedTuple instances for distribution parameters."""
+        for field_name, field_type in self.__annotations__.items():
+            value = getattr(self, field_name)
+            if isinstance(value, list):
+                for arg in get_args(field_type):
+                    if issubclass(arg, tuple):
+                        object.__setattr__(self, field_name, arg(*value))
+                        break
 
     def process_value(self, value: Any, call_next: Callable[[Any], Any]) -> Any:
         """Process value through numeric hint - generate if no input, continue chain."""
