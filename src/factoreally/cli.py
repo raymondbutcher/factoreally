@@ -19,17 +19,21 @@ def cli() -> None:
 
 @cli.command()
 @click.option(
+    "--cli",
+    "cli_config_path",
+    type=click.Path(exists=True, path_type=Path),
+    help="Path to JSON config file with default values for --in, --out, --model",
+)
+@click.option(
     "--in",
     "input_path",
     type=click.Path(exists=True, path_type=Path),
-    required=True,
     help="Path to the JSON data file to analyze",
 )
 @click.option(
     "--out",
     "output_path",
     type=click.Path(path_type=Path),
-    required=True,
     help="Path for the generated JSON factory spec file",
 )
 @click.option(
@@ -37,12 +41,37 @@ def cli() -> None:
     type=str,
     help="Python import path for Pydantic model (e.g., 'mypackage.models.MyModel')",
 )
-def create(input_path: Path, output_path: Path, model: str | None = None) -> None:
+def create(
+    cli_config_path: Path | None,
+    input_path: Path | None,
+    output_path: Path | None,
+    model: str | None = None,
+) -> None:
     """Create a factory specification from sample data.
 
     Loads sample data, runs analysis, and writes the
     generated factory spec to the specified output file.
     """
+    # Load config file if provided and merge with CLI args
+    if cli_config_path is not None:
+        config = json.loads(cli_config_path.read_text())
+
+        # Use config values as defaults, CLI args take priority
+        if input_path is None and "--in" in config:
+            input_path = Path(config["--in"])
+        if output_path is None and "--out" in config:
+            output_path = Path(config["--out"])
+        if model is None and "--model" in config:
+            model = config["--model"]
+
+    # Validate required parameters
+    if input_path is None:
+        msg = "Missing option '--in' (provide via CLI or config file)"
+        raise click.UsageError(msg)
+    if output_path is None:
+        msg = "Missing option '--out' (provide via CLI or config file)"
+        raise click.UsageError(msg)
+
     # Load sample data from JSON file
     file_size_mb = input_path.stat().st_size / (1024 * 1024)
     click.secho(f"Loading {input_path.name} ({file_size_mb:.1f}MB)", fg="blue")
