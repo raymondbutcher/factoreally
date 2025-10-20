@@ -18,7 +18,7 @@ class MissingHint(AnalysisHint):
 
     def process_value(self, value: Any, call_next: Callable[[Any], Any]) -> Any:
         """Process value through missing hint - continue chain or return MISSING."""
-        # Use pct as probability (e.g., 70.0 means 70% chance of field being present)
-        if random.random() * 100 > self.pct:
+        # Use pct as probability (e.g., 70.0 means 70% chance of field being missing)
+        if random.random() * 100 < self.pct:
             return MISSING
         return call_next(value)  # Continue the hint chain
