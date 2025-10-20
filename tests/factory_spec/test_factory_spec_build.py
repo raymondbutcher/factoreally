@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING
 
 from factoreally.factory_spec import FactorySpec
-from factoreally.hints import ArrayHint, ChoiceHint, ConstantValueHint, NumberHint
+from factoreally.hints import ArrayHint, ChoiceHint, ConstantValueHint, MissingHint, NumberHint
 
 if TYPE_CHECKING:
     from factoreally.hints.base import AnalysisHint
@@ -97,3 +97,26 @@ def test_factory_spec_build_minimal_array_no_recursion() -> None:
     # Each element should be one of the choices
     for action in actions:
         assert action in ["A", "B"]
+
+
+def test_build_array_with_missing_hint() -> None:
+    """Test that _build_array should handle MISSING marker from hint chain.
+
+    When an array field has hints [ARRAY, NUMBER, MISSING], the MISSING hint
+    can return MISSING instead of an integer array size. The _build_array method
+    should handle this by returning MISSING (which _build_object will exclude from result).
+    """
+    field_path_hints: dict[str, list[AnalysisHint]] = {
+        "events": [
+            ArrayHint(type="ARRAY"),
+            NumberHint(type="NUMBER", min=1, max=3),
+            MissingHint(type="MISSING", pct=100.0),  # 100% missing = always missing
+        ],
+        "events[]": [ConstantValueHint(val="event")],
+    }
+
+    spec = FactorySpec(field_path_hints)
+    result = spec.build()
+
+    # With pct=100.0 (always missing), the field should not be in the result
+    assert "events" not in result

@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from factoreally.hints import create_hints_from_spec_format, generate_value_from_hints
-from factoreally.hints.base import MISSING, NULL, AnalysisHint
+from factoreally.hints.base import MISSING, NULL, AnalysisHint, Sentinel
 
 
 class SpecValidationError(Exception):
@@ -35,13 +35,15 @@ class FactorySpec:
             if not self._prepared:
                 self._prepare_array()
                 self._prepared = True
-            return self._build_array()
+            array_result = self._build_array()
+            return None if array_result is NULL else array_result
 
         if self._is_object_field:
             if not self._prepared:
                 self._prepare_dynamic_object()
                 self._prepared = True
-            return self._build_dynamic_object()
+            object_result = self._build_dynamic_object()
+            return None if object_result is NULL else object_result
 
         if self._children:
             if not self._prepared:
@@ -79,13 +81,16 @@ class FactorySpec:
             field_path=f"{self._field_path}[]",
         )
 
-    def _build_array(self) -> list[Any] | None:
+    def _build_array(self) -> list[Any] | Sentinel:
         """Build array field with elements."""
 
         array_size = generate_value_from_hints(self._hints)
 
         if array_size is NULL:
-            return None
+            return NULL
+
+        if array_size is MISSING:
+            return MISSING
 
         if not isinstance(array_size, int):
             msg = f"unexpected generated value for array size: {array_size}"
@@ -123,13 +128,16 @@ class FactorySpec:
             field_path=f"{self._field_path}{{}}",
         )
 
-    def _build_dynamic_object(self) -> dict[str, Any] | None:
+    def _build_dynamic_object(self) -> dict[str, Any] | Sentinel:
         """Build dynamic object field with random keys and values."""
 
         object_key_count = generate_value_from_hints(self._hints)
 
         if object_key_count is NULL:
-            return None
+            return NULL
+
+        if object_key_count is MISSING:
+            return MISSING
 
         if not isinstance(object_key_count, int):
             msg = f"unexpected generated value for object key count: {object_key_count}"
