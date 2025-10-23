@@ -3,7 +3,9 @@
 from factoreally.pydantic_models import analyze_pydantic_model
 
 from .conftest import (
+    DailyCounts,
     DeepNestedModel,
+    MappingModel,
     NestedModel,
     NoMetadataModel,
     SimpleModel,
@@ -48,4 +50,24 @@ def test_analyze_pydantic_model_deep_nested() -> None:
     expected_fields = {"level1.metadata", "level1.level2.config"}
 
     assert dynamic_fields == expected_fields
+    assert len(dynamic_fields) == 2
+
+
+def test_analyze_pydantic_model_rootmodel_with_mapping() -> None:
+    """Test analyzing RootModel with Mapping type."""
+    dynamic_fields = analyze_pydantic_model(DailyCounts)
+
+    # RootModel fields are exposed at the root level, so we expect "root" to be detected
+    assert "root" in dynamic_fields
+    assert len(dynamic_fields) == 1
+
+
+def test_analyze_pydantic_model_with_mapping_field() -> None:
+    """Test analyzing a model containing a RootModel[Mapping[...]] field."""
+    dynamic_fields = analyze_pydantic_model(MappingModel)
+
+    # Should detect both the RootModel field and its root attribute
+    assert "daily_stats" in dynamic_fields
+    assert "daily_stats.root" in dynamic_fields
+    assert "name" not in dynamic_fields
     assert len(dynamic_fields) == 2

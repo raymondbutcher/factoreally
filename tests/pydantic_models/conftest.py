@@ -1,8 +1,10 @@
 """Shared fixtures and models for pydantic model tests."""
 
+from collections.abc import Mapping
+from datetime import date
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, RootModel
 
 
 class SimpleModel(BaseModel):
@@ -39,3 +41,17 @@ class Level1Model(BaseModel):
 class Level2Model(BaseModel):
     name: str
     config: dict[str, Any]  # Dynamic field at level 2
+
+
+# RootModel test classes using Mapping types
+class DailyCounts(RootModel[Mapping[date, int]]):
+    """Dictionary with date strings as keys and counts as values"""
+
+    root: Mapping[date, int]
+
+
+class MappingModel(BaseModel):
+    """Model with a RootModel field using Mapping type."""
+
+    name: str
+    daily_stats: DailyCounts  # Dynamic field using RootModel with Mapping

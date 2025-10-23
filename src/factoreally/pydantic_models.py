@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import collections.abc
 import importlib
 import inspect
 from typing import Any, ForwardRef, get_args, get_origin
@@ -57,8 +58,8 @@ def _is_dynamic_dict_field(annotation: Any) -> bool:
     """
     origin = get_origin(annotation)
 
-    # Any dict type should be considered dynamic
-    if origin is dict:
+    # Check for dict and Mapping types (includes collections.abc.Mapping and MutableMapping)
+    if origin in (dict, collections.abc.Mapping, collections.abc.MutableMapping):
         return True
 
     # Check for Union types (e.g., dict[str, str] | None)
